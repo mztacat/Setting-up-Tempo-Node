@@ -30,12 +30,6 @@ sudo apt-get update && sudo apt-get upgrade -y
 sudo apt install -y curl git build-essential pkg-config libssl-dev clang lz4 jq htop
 ```
 
-
-### Reboot system [reboot system and wait a few minutes] 
-```
-reboot
-```
-
 ### Let's tune system limit for high performance Node
 ```
 cat << 'EOF' | sudo tee /etc/security/limits.d/99-tempo.conf
@@ -45,7 +39,7 @@ EOF
 ```
 <img width="3472" height="496" alt="image" src="https://github.com/user-attachments/assets/00aba8d9-5b37-4765-b885-9e71eb8e813d" />
 
-### Reboot system aggain 
+### Reboot system  
 ```
 reboot
 ```
@@ -89,6 +83,71 @@ There are differnet ways of which we can install Tempo and running the Node,
   * Build from Source
   * Binary
 ### In this guide, I will be `Building Tempo from Source` 
+
+
+## Build Tempo from Source 
+ - Building from source gives you the full binary with all commands which is very important for validators.
+
+---
+
+### Clone the Repo: 
+```
+cd $HOME/tempo-node
+git clone https://github.com/tempoxyz/tempo.git
+cd tempo
+cargo build --release --bin tempo
+```
+<img width="2854" height="1062" alt="image" src="https://github.com/user-attachments/assets/17f60a56-a804-4a7a-8c33-4aa30e692b5d" />
+
+
+### Move to system path
+```
+sudo cp target/release/tempo /usr/local/bin/
+sudo chmod +x /usr/local/bin/tempo
+```
+
+
+# Confirm it works
+You should see the below screenshot. 
+```
+tempo
+```
+<img width="2342" height="842" alt="image" src="https://github.com/user-attachments/assets/4d88fcbe-967a-486c-a112-e9e41d7f3886" />
+
+---
+
+### Let's grab Snapshot 
+Syncing from block zero takes forever. Instead, we wi;; grab from official snapshot 
+
+```
+cd $HOME/tempo-node
+```
+
+### Check [Tempo Snapshot](https://snapshots.tempoxyz.dev/) for the latest URL
+
+The one I marked in below screenshot is the latest URL 
+```
+SNAP_URL="<paste_snapshot_url_here>"
+curl -L "$SNAP_URL" | lz4 -d | tar -xvf - -C $HOME/tempo-node/data
+```
+<img width="4020" height="1914" alt="image" src="https://github.com/user-attachments/assets/9de1533d-3d3c-40ab-afb0-25a58744bfea" />
+
+---
+## What I did here,  I copied the latest snapshot link form above link/image and executed 
+  ```
+mkdir data
+SNAP_URL="https://tempo-node-snapshots.tempoxyz.dev/tempo-42429-8176022-1767243621.tar.lz4"
+curl -L "$SNAP_URL" | lz4 -d | tar -xvf - -C $HOME/tempo-node/data
+  ```
+
+---
+
+
+
+
+
+
+
 
 
 
