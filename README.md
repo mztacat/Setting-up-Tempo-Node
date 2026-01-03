@@ -10,10 +10,56 @@ Tempo is Stripe and Paradigm's blockchain built for stablecoin payments. It runs
 
 ---
 
+
+# Tempo Node System Requirements
+
+By following this guide, operators can maximize uptime, ensure smooth synchronization, and maintain a stable presence on the Tempo network
+
+---
+
+> ⚠️ **Important Notes**
+> 
+> - **Do NOT run an RPC Node and a Validator on the same server** — they use overlapping ports (30303, 8545), which will result in **port binding conflicts**.
+> 
+> - **Do NOT use the same data directory** for multiple node instances as this will cause **database corruption** and failed syncs.
+> 
+> - To be eligible for the **Validator Role**, you must be **whitelisted by the Tempo team** — contact `partners@tempo.xyz` with your public key and server IP.
+> 
+> - The official docs state 100GB storage minimum but from what I noticed, Real-world usage requires **500GB+ NVMe**.
+
+---
+
+
 ### Type of Tempo Nodes: 
-   * RPC Node:  Open to everyone. Serves API requests for dApps and wallets.
-   * Validator Node: This is Permissioned as it requires Tempo team approval to produce blocks.
+  | Type | Permission | Purpose | Who Should Run |
+|------|------------|---------|----------------|
+| **RPC Node** | Open to all | Sync chain, serve API requests | Everyone |
+| **Validator** | Permissioned | Produce blocks, earn rewards | Whitelisted operators only |
 <img width="2918" height="410" alt="image" src="https://github.com/user-attachments/assets/16b6df62-774f-4693-841d-e18b6b264fc8" />
+
+
+
+## Preparation and Requirements
+
+- [ ] Read the [Tempo Official Docs](https://docs.tempo.xyz)
+
+- [ ] You'll need **one server** with the following specifications:
+
+  | Component | Minimum | Recommended |
+  |-----------|---------|-------------|
+  | **CPU** | 4 cores | 8+ cores |
+  | **RAM** | 16 GB | 32 GB |
+  | **Storage** | 500 GB NVMe | 1 TB NVMe |
+  | **Bandwidth** | 50 Mbps | 100+ Mbps |
+  | **OS** | Ubuntu 22.04 / 24.04 | Ubuntu 24.04 LTS |
+
+- [ ] Take note of your server's **public IP** address
+
+- [ ] Open required ports on your firewall:
+  - `30303` (TCP & UDP) — P2P networking & peer discovery
+  - `8545` (TCP) — HTTP RPC *(optional, keep internal unless needed)*
+  - `8546` (TCP) — WebSocket RPC *(optional)*
+  - `9000` (TCP) — Metrics *(optional, for monitoring)*
 
 
 
@@ -327,6 +373,54 @@ tempo node \
     --http.port 8545 \
     --http.api eth,net,web3,txpool,trace
 ```
+---
+
+
+
+
+
+
+
+
+
+---
+
+## 2. Storage Reality Check
+
+| What | Size |
+|------|------|
+| Compressed snapshot download | ~164 GB |
+| Extracted chain data | ~320 GB |
+| Recommended free space | 500 GB+ |
+
+**Why NVMe?** Tempo requires fast read/write speeds for block processing. SATA SSDs and HDDs will cause sync delays and poor performance.
+
+---
+
+
+---
+
+# MISC: 
+## Quick Checklist
+
+### For RPC Node
+
+- [ ] Downloaded Tempo binary
+- [ ] Downloaded latest snapshot from [snapshots.tempoxyz.dev](https://snapshots.tempoxyz.dev)
+- [ ] Created systemd service
+- [ ] Node syncing and finding peers
+
+### For Validator (Additional)
+
+- [ ] Generated validator keys
+- [ ] Backed up keys securely
+- [ ] Sent public key + IP to `partners@tempo.xyz`
+- [ ] Received whitelist confirmation
+- [ ] Configured reward address (0x...)
+- [ ] Created validator systemd service
+
+---
+
 
 ---
 
@@ -339,6 +433,8 @@ https://docs.tempo.xyz/guide/node
 ##  Twitter
 Follow updates and node operation posts on Twitter:  
 https://twitter.com/mztacat
+
+*Guide by mztacat | January 2026 | Tempo v0.8.0*
 
 ---
 
