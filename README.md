@@ -210,6 +210,53 @@ tempo --version
 ```
 source /root/.bashrc
 ```
+
+
+---
+
+### Let's grab Snapshot 
+Syncing from block zero takes forever. Instead, we wi;; grab from official snapshot 
+
+```
+cd $HOME/tempo-node
+```
+
+### Check [Tempo Snapshot](https://snapshots.tempoxyz.dev/) for the latest URL
+
+The one I marked in below screenshot is the latest URL (old now) 
+```
+SNAP_URL="<paste_snapshot_url_here>"
+curl -L "$SNAP_URL" | lz4 -d | tar -xvf - -C $HOME/tempo-node/data
+```
+<img width="4020" height="1914" alt="image" src="https://github.com/user-attachments/assets/9de1533d-3d3c-40ab-afb0-25a58744bfea" />
+
+---
+## What I did here,  I copied the latest snapshot link form above link/image and executed 
+  ```
+mkdir data
+SNAP_URL="https://tempo-node-snapshots.tempoxyz.dev/tempo-42429-8380104-1767416422.tar.lz4"
+curl -L "$SNAP_URL" | lz4 -d | tar -xvf - -C $HOME/tempo-node/data
+  ```
+
+** This Download is ~190gb currently, and extracting it also takes significant amount of space ** 
+
+<img width="3752" height="1868" alt="image" src="https://github.com/user-attachments/assets/5ffe7cfd-eaf9-4ce3-a05b-01ae83f1d991" />
+
+
+### After extraction, verify size:
+```
+du -sh $HOME/tempo-node/data
+```
+Should be 300GB+.
+
+
+### After extracting, verify file 
+As the blocks keep increasing, so as file size increases 
+```
+du -sh $HOME/tempo-node/data
+```
+
+
 ---
 ### Install and Open new screen 
 ```
@@ -292,75 +339,6 @@ sudo systemctl status tempo-rpc
 
 ---
 
-### Let's grab Snapshot 
-Syncing from block zero takes forever. Instead, we wi;; grab from official snapshot 
-
-```
-cd $HOME/tempo-node
-```
-
-### Check [Tempo Snapshot](https://snapshots.tempoxyz.dev/) for the latest URL
-
-The one I marked in below screenshot is the latest URL (old now) 
-```
-SNAP_URL="<paste_snapshot_url_here>"
-curl -L "$SNAP_URL" | lz4 -d | tar -xvf - -C $HOME/tempo-node/data
-```
-<img width="4020" height="1914" alt="image" src="https://github.com/user-attachments/assets/9de1533d-3d3c-40ab-afb0-25a58744bfea" />
-
----
-## What I did here,  I copied the latest snapshot link form above link/image and executed 
-  ```
-mkdir data
-SNAP_URL="https://tempo-node-snapshots.tempoxyz.dev/tempo-42429-8380104-1767416422.tar.lz4"
-curl -L "$SNAP_URL" | lz4 -d | tar -xvf - -C $HOME/tempo-node/data
-  ```
-
-** This Download is ~190gb currently, and extracting it also takes significant amount of space ** 
-
-<img width="3752" height="1868" alt="image" src="https://github.com/user-attachments/assets/5ffe7cfd-eaf9-4ce3-a05b-01ae83f1d991" />
-
-
-### After extraction, verify size:
-```
-du -sh $HOME/tempo-node/data
-```
-Should be 300GB+.
-
-
-
-### Clone the Repo: 
-```
-cd $HOME/tempo-node
-git clone https://github.com/tempoxyz/tempo.git
-cd tempo
-cargo build --release --bin tempo
-```
-<img width="2854" height="1062" alt="image" src="https://github.com/user-attachments/assets/17f60a56-a804-4a7a-8c33-4aa30e692b5d" />
-
-
-### Move to system path
-```
-sudo cp target/release/tempo /usr/local/bin/
-sudo chmod +x /usr/local/bin/tempo
-```
-
-
-# Confirm it works
-You should see the below screenshot. 
-```
-tempo
-```
-<img width="2342" height="842" alt="image" src="https://github.com/user-attachments/assets/4d88fcbe-967a-486c-a112-e9e41d7f3886" />
-
-
----
-
-### After extracting, verify file 
-As the blocks keep increasing, so as file size increases 
-```
-du -sh $HOME/tempo-node/data
-```
 
 ## Running RPC Node 
 ### RPC nodes don't need special permission. They sync the chain and serve API requests. 
@@ -376,28 +354,7 @@ tempo node \
 ```
 ---
 
-
-
-
-
-
-
-
-
----
-
-## 2. Storage Reality Check
-
-| What | Size |
-|------|------|
-| Compressed snapshot download | ~164 GB |
-| Extracted chain data | ~320 GB |
-| Recommended free space | 500 GB+ |
-
-**Why NVMe?** Tempo requires fast read/write speeds for block processing. SATA SSDs and HDDs will cause sync delays and poor performance.
-
----
-
+# I will update the Validator Node as soon as I get approved to set it up, gathering resources right now 
 
 ---
 
