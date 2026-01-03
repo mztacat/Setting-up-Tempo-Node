@@ -81,14 +81,206 @@ rustc --version && cargo --version
 There are differnet ways of which we can install Tempo and running the Node, 
   * Pre-build Binary
   * Build from Source
-  * Binary
-### In this guide, I will be `Building Tempo from Source` 
+  * Docker
+### In this guide, I will be using `Pre-Build` 
 
 
-## Build Tempo from Source 
- - Building from source gives you the full binary with all commands which is very important for validators.
+## Install Docker 
+
+```
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+```
+
+```
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo usermod -aG docker $USER
+
+sudo systemctl enable docker
+sudo systemctl start docker
+```
+
+### Log out and back in for docker group to take effect.
+```
+reboot
+```
+
+### Verify Docker works:
+```
+docker --version
+docker run hello-world
+```
+
+### Install UFW
+```
+apt update
+apt install -y ufw
+```
+
+### Allow SSH 
+```
+ufw allow ssh
+```
+<img width="3700" height="720" alt="image" src="https://github.com/user-attachments/assets/73b25596-6de3-4167-8ced-c3dad9a946d0" />
+
+
+### Allow Tempo P2P ports
+Tempo (Reth-based) needs both TCP and UDP.
+```
+ufw allow 30303/tcp
+ufw allow 30303/udp
+```
+
+### Enable UFW 
+Reply with `y` and proceed 
+```
+ufw enable
+```
+
+
+### CD into Directory
+```
+cd $HOME/tempo-node
+```
+
+## Pre-built Binary 
+```
+curl -L https://tempo.xyz/install | bash
+tempo --version
+```
+
+<img width="3748" height="2256" alt="image" src="https://github.com/user-attachments/assets/a4170011-2534-49ad-bfad-78b4b0d81e58" />
+
+
+### Reload Source
+```
+source /root/.bashrc
+```
+---
+### Install and Open new screen 
+```
+apt update
+apt install -y screen
+screen -S tempo
+```
+- Detach screen:    Ctrl + A, then D
+- List screens:     screen -ls
+- Reattach screen:  screen -r tempo
+- Force reattach:   screen -D -r tempo
+- Kill screen:      exit   (from inside the screen)
 
 ---
+### Start Tempo Node: 
+```
+tempo node \
+  --follow \
+  --http --http.port 8545 \
+  --http.api eth,net,web3,txpool,trace
+```
+
+<img width="3760" height="2216" alt="image" src="https://github.com/user-attachments/assets/1dd8a5c4-c4e7-429a-a9ca-f6ca913ce9ab" />
+
+
+** You should see sync logs and peer connections. Press Ctrl+C to stop once confirmed working. ** 
+
+
+## Production Setup (Systemd)
+### Create a [service file](https://docs.tempo.xyz/guide/node/rpc#example-systemd-service) so the node runs in background and auto-restarts:
+
+```
+sudo tee /etc/systemd/system/tempo-rpc.service > /dev/null << EOF
+[Unit]
+Description=Tempo RPC Node
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=$USER
+WorkingDirectory=$HOME/tempo-node
+Environment=RUST_LOG=info
+ExecStart=/usr/local/bin/tempo node \\
+    --datadir $HOME/tempo-node/data \\
+    --port 30303 \\
+    --discovery.addr 0.0.0.0 \\
+    --discovery.port 30303 \\
+    --http \\
+    --http.addr 0.0.0.0 \\
+    --http.port 8545 \\
+    --http.api eth,net,web3,txpool,trace \\
+    --ws \\
+    --ws.addr 127.0.0.1 \\
+    --ws.port 8546 \\
+    --metrics 9000
+Restart=always
+RestartSec=5
+LimitNOFILE=1048576
+
+[Install]
+WantedBy=multi-user.target
+EOF
+```
+
+### Activate it:
+```
+sudo systemctl daemon-reload
+sudo systemctl enable tempo-rpc
+sudo systemctl start tempo-rpc
+```
+
+### Check if running
+
+```
+sudo systemctl status tempo-rpc
+```
+<img width="3784" height="1044" alt="image" src="https://github.com/user-attachments/assets/2b136e24-dd36-4e87-a5ea-78e7ff240cb7" />
+
+
+---
+
+### Let's grab Snapshot 
+Syncing from block zero takes forever. Instead, we wi;; grab from official snapshot 
+
+```
+cd $HOME/tempo-node
+```
+
+### Check [Tempo Snapshot](https://snapshots.tempoxyz.dev/) for the latest URL
+
+The one I marked in below screenshot is the latest URL (old now) 
+```
+SNAP_URL="<paste_snapshot_url_here>"
+curl -L "$SNAP_URL" | lz4 -d | tar -xvf - -C $HOME/tempo-node/data
+```
+<img width="4020" height="1914" alt="image" src="https://github.com/user-attachments/assets/9de1533d-3d3c-40ab-afb0-25a58744bfea" />
+
+---
+## What I did here,  I copied the latest snapshot link form above link/image and executed 
+  ```
+mkdir data
+SNAP_URL="https://tempo-node-snapshots.tempoxyz.dev/tempo-42429-8380104-1767416422.tar.lz4"
+curl -L "$SNAP_URL" | lz4 -d | tar -xvf - -C $HOME/tempo-node/data
+  ```
+
+** This Download is ~190gb currently, and extracting it also takes significant amount of space ** 
+
+<img width="3752" height="1868" alt="image" src="https://github.com/user-attachments/assets/5ffe7cfd-eaf9-4ce3-a05b-01ae83f1d991" />
+
+
+### After extraction, verify size:
+```
+du -sh $HOME/tempo-node/data
+```
+Should be 300GB+.
+
+
 
 ### Clone the Repo: 
 ```
@@ -114,42 +306,39 @@ tempo
 ```
 <img width="2342" height="842" alt="image" src="https://github.com/user-attachments/assets/4d88fcbe-967a-486c-a112-e9e41d7f3886" />
 
----
-
-### Let's grab Snapshot 
-Syncing from block zero takes forever. Instead, we wi;; grab from official snapshot 
-
-```
-cd $HOME/tempo-node
-```
-
-### Check [Tempo Snapshot](https://snapshots.tempoxyz.dev/) for the latest URL
-
-The one I marked in below screenshot is the latest URL 
-```
-SNAP_URL="<paste_snapshot_url_here>"
-curl -L "$SNAP_URL" | lz4 -d | tar -xvf - -C $HOME/tempo-node/data
-```
-<img width="4020" height="1914" alt="image" src="https://github.com/user-attachments/assets/9de1533d-3d3c-40ab-afb0-25a58744bfea" />
-
----
-## What I did here,  I copied the latest snapshot link form above link/image and executed 
-  ```
-mkdir data
-SNAP_URL="https://tempo-node-snapshots.tempoxyz.dev/tempo-42429-8176022-1767243621.tar.lz4"
-curl -L "$SNAP_URL" | lz4 -d | tar -xvf - -C $HOME/tempo-node/data
-  ```
 
 ---
 
+### After extracting, verify file 
+As the blocks keep increasing, so as file size increases 
+```
+du -sh $HOME/tempo-node/data
+```
+
+## Running RPC Node 
+### RPC nodes don't need special permission. They sync the chain and serve API requests. 
+
+```
+tempo node \
+    --datadir $HOME/tempo-node/data \
+    --follow \
+    --http \
+    --http.addr 127.0.0.1 \
+    --http.port 8545 \
+    --http.api eth,net,web3,txpool,trace
+```
+
+---
+
+## 📚 Documentation
+
+Official Tempo node guide:  
+https://docs.tempo.xyz/guide/node
 
 
+##  Twitter
+Follow updates and node operation posts on Twitter:  
+https://twitter.com/mztacat
 
-
-
-
-
-
-
-
+---
 
