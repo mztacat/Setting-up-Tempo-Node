@@ -64,6 +64,7 @@ By following this guide, operators can maximize uptime, ensure smooth synchroniz
 
 
 
+## Getting Started: 
 ### Update package: 
 ```
 sudo apt-get update && sudo apt-get upgrade -y 
