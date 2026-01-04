@@ -356,6 +356,35 @@ tempo node \
 
 # I will update the Validator Node as soon as I get approved to set it up, gathering resources right now 
 
+
+## Update: on Applying for Validator 
+
+```
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+source "$HOME/.cargo/env"
+
+sudo apt install -y build-essential pkg-config libssl-dev clang
+```
+
+### Clone and build
+```
+cd $HOME/tempo-node
+git clone https://github.com/tempoxyz/tempo.git
+cd tempo
+cargo build --release --bin tempo
+```
+
+### Use the built binary
+```
+./target/release/tempo consensus generate-private-key --output $HOME/tempo-node/validator-key
+```
+
+### Get public key
+```
+./target/release/tempo consensus calculate-public-key --private-key $HOME/tempo-node/validator-key
+```
+
+
 ---
 
 # MISC: 
