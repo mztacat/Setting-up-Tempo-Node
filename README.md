@@ -5,8 +5,6 @@ Tempo is Stripe and Paradigm's blockchain built for stablecoin payments. It runs
 
 ---
 
-## Tempo raised $500M at a $5B Valuation which includes Investors like Sequoia Capital, Ribbit Capital, Paradigm among few other Investors. 
-<img width="4020" height="2362" alt="image" src="https://github.com/user-attachments/assets/d5637aec-15a6-4107-a73a-6022d214af29" />
 
 ---
 
